@@ -2,6 +2,7 @@
 topic <- 3  #찾아낸 기사들에서 몇 개의 주제를 뽑아낼지
 m <- 10  #총 기사 갯수
 n <- 3  #주제와 관련 깊은 뉴스 몇개 뽑아낼건지
+l <- 10 #한 토픽이 몇 개의 단어로 구성될지
 
 #---------1. LSA로 수많은 기사들에서 가장 핫한 topic개의 이슈 뽑아냄--------------------------------------
 
@@ -48,12 +49,15 @@ library(KoNLP)
 for(i in 1:topic){
   cat("topic #", i, "")
   importance = order(abs(tk[, i]), decreasing = T) # 첫번째 값이 +일지 -일지 몰라서 abs 
-  query <- names(tk[importance[1:10], i])
+  query <- names(tk[importance[1:l], i])
+  print(names(tk[importance[1:l], i]))
   
   docs <- news$newdescp
+  titles <- news$title
+  names(docs) <- paste(titles, sep="")
   
-  for(j in 1:10){
-    docs[11] <- paste(quer,query[j])
+  for(j in 1:l){
+    docs[m+1] <- paste(docs[m+1],query[j])
   }
   docs.corp <- Corpus(VectorSource(docs))
   
@@ -80,6 +84,10 @@ for(i in 1:topic){
   orders <- data.frame(docs=docs[-m],scores=t(docord) ,stringsAsFactors=FALSE)
   orders[order(docord, decreasing=T),]
   
-  print(order(docord, decreasing=T)[1:n])
+  for(k in 1:n){
+    #print(order(docord, decreasing=T)[i])
+    print(names(docs[(order(docord, decreasing=T)[k])]))
+  }
 }
 
+#write.table()
