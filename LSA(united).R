@@ -9,7 +9,7 @@ l <- 10 #한 토픽이 몇 개의 단어로 구성될지
 setwd('C:/Users/DK/summarization')
 label <- c('title', 'newdescp', 'url')
 
-news = read.csv("News4.csv", header = F, col.names = label, stringsAsFactors = F)
+news = read.csv("News.csv", header = F, col.names = label, stringsAsFactors = F)
 
 library(tm)
 tdm = TermDocumentMatrix(Corpus(VectorSource(news$newdescp)),
@@ -47,10 +47,11 @@ tk = Varimax(news.lsa$tk)$loadings
 library(KoNLP)
 
 for(i in 1:topic){
-  cat("topic #", i, "")
+  #tt <- paste("topic", i,".txt")       txt파일로 저장할 때 사용
+  tt <- paste("topic", i,".xlsx")    # xlsx파일로 저장할 때 사용
   importance = order(abs(tk[, i]), decreasing = T) # 첫번째 값이 +일지 -일지 몰라서 abs 
   query <- names(tk[importance[1:l], i])
-  print(names(tk[importance[1:l], i]))
+  #print(names(tk[importance[1:l], i]))            # 각 주제
   
   docs <- news$newdescp
   titles <- news$title
@@ -84,10 +85,19 @@ for(i in 1:topic){
   orders <- data.frame(docs=docs[-m],scores=t(docord) ,stringsAsFactors=FALSE)
   orders[order(docord, decreasing=T),]
   
+  narr <- ""
+  carr <- ""
+  
   for(k in 1:n){
     #print(order(docord, decreasing=T)[i])
-    print(names(docs[(order(docord, decreasing=T)[k])]))
+    #print(names(docs[(order(docord, decreasing=T)[k])]))
+    narr[k] <- names(docs[(order(docord, decreasing=T)[k])])
+    carr[k] <- docs[(order(docord, decreasing=T)[k])]
   }
+  data <- data.frame(narr, carr)
+  #write.table(data, tt, row.names = F, col.names = F)   txt파일로 저장할 때 사요
+  
+  library(xlsx)
+  write.xlsx(data, tt, row.names = F, col.names = F)     # xlsx파일로 저장할 때 사용
 }
 
-#write.table()
