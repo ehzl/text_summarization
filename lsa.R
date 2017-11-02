@@ -1,6 +1,6 @@
 
 topic <- 3  
-m <- 10
+m <- 25
 n <- 3
 l <- 10
 
@@ -9,9 +9,9 @@ l <- 10
 #---------1.LSA--------------------------------------
 
 #setwd()
-label <- c('title', 'newdescp', 'url')
+label <- c('title', 'newdescp')
 
-news = read.table("News.txt", header = F, col.names = label, sep="\t", stringsAsFactors = F, fill=T, encoding="UTF-8")
+news = read.table("output.txt", header = F, col.names = label, sep="\t", stringsAsFactors = F, fill=T, encoding="UTF-8")
 
 library(tm)
 tdm = TermDocumentMatrix(Corpus(VectorSource(news$newdescp)),
@@ -44,8 +44,8 @@ for(i in 1:topic){
   #print(names(tk[importance[1:l], i]))           
   
   docs <- news$newdescp
-  #titles <- news$title
-  #names(docs) <- paste(titles, sep="")
+  titles <- news$title
+  names(docs) <- paste(titles, sep="")
   
   for(j in 1:l){
     docs[m+1] <- paste(docs[m+1],query[j])
@@ -71,11 +71,15 @@ for(i in 1:topic){
   orders[order(docord, decreasing=T),]
 
   carr <- ""
+  narr <- ""
   
   for(k in 1:n){
     carr[k] <- docs[(order(docord, decreasing=T)[k])]
+    narr[k] <- names(docs[(order(docord, decreasing=T)[k])])
   }
 
-  write.table(carr, tt, row.names = F, col.names = F) 
+  data <- data.frame(narr, carr)
+  write.table(data, tt, row.names = F, col.names = F) 
 }
+
 
