@@ -1,8 +1,8 @@
 
-topic <- 3  
-m <- 25
-n <- 3
-l <- 10
+topic <- 3 # num of topic 
+m <- 25   # num of articles
+n <- 1     # num of selected articles per topic
+l <- 10    # num of verb in one topic
 
 #dir <- commandArgs(trailingOnly = TRUE)
 
@@ -38,7 +38,6 @@ tk = Varimax(news.lsa$tk)$loadings
 
 for(i in 1:topic){
   tt <- paste("topic", i,".txt")      
-  #tt <- paste("topic", i,".xlsx")  
   importance = order(abs(tk[, i]), decreasing = T) 
   query <- names(tk[importance[1:l], i])
   #print(names(tk[importance[1:l], i]))           
