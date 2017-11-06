@@ -1,14 +1,11 @@
 
 topic <- 3 # num of topic 
-m <- 25   # num of articles
-n <- 1     # num of selected articles per topic
+m <- 100   # num of articles
+#n <- 1     # num of selected articles per topic
 l <- 10    # num of verb in one topic
 
-#dir <- commandArgs(trailingOnly = TRUE)
+#----------------------1. find 'topic' number of big issues-------------------------------------
 
-#---------1.LSA--------------------------------------
-
-#setwd()
 label <- c('title', 'newdescp')
 
 news = read.table("output.txt", header = F, col.names = label, sep="\t", stringsAsFactors = F, fill=T, encoding="UTF-8")
@@ -23,7 +20,6 @@ library(slam)
 word.count = as.array(rollup(tdm, 2))
 word.order = order(word.count, decreasing = T)
 fre.qword = word.order[1:(dim(tdm)[1])/3]
-#row.names(tdm[freq.word,])
 
 library(lsa)
 news.lsa = lsa(tdm,topic)
@@ -32,15 +28,16 @@ library(GPArotation)
 tk = Varimax(news.lsa$tk)$loadings
 
 
-#---------2.choose articles of each topic----------------------------------------
+#---------2.choose one article that has the highest similarity with each topic---------------------
 
-#library(KoNLP)
+carr = ""  # array of contents of news articles
+narr = ""  # array of titles of news articles
 
+# for each topic
 for(i in 1:topic){
   tt <- paste("topic", i,".txt")      
   importance = order(abs(tk[, i]), decreasing = T) 
-  query <- names(tk[importance[1:l], i])
-  #print(names(tk[importance[1:l], i]))           
+  query <- names(tk[importance[1:l], i])        
   
   docs <- news$newdescp
   titles <- news$title
@@ -68,17 +65,23 @@ for(i in 1:topic){
   
   orders <- data.frame(docs=docs[-m],scores=t(docord) ,stringsAsFactors=FALSE)
   orders[order(docord, decreasing=T),]
-
-  carr <- ""
-  narr <- ""
   
-  for(k in 1:n){
-    carr[k] <- docs[(order(docord, decreasing=T)[k])]
-    narr[k] <- names(docs[(order(docord, decreasing=T)[k])])
-  }
+  index = 1
+  narr[i] <- names(docs[(order(docord, decreasing=T)[index])])
+  carr[i] <- docs[(order(docord, decreasing=T)[index])]
 
-  data <- data.frame(narr, carr)
-  write.table(data, tt, row.names = F, col.names = F) 
+  # eliminate overlapping case
+  if(i>1){
+    for(k in 1:i-1){
+      if(narr[i] %in% c(narr[k])){
+        index = index + 1
+        narr[i] <- names(docs[(order(docord, decreasing=T)[index])])
+        carr[i] <- docs[(order(docord, decreasing=T)[index])]
+      }
+    }
+  }
+  
+  cat(narr[i],"\n",carr[i],"\n", file=tt, append=F)
 }
 
 
